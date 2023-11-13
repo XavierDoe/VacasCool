@@ -8,6 +8,17 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+<Addons>
+    <Addon AddonType="AddonType.Body">
+        <DatePicker @ref="@datePicker" TValue="DateTime?" />
+    </Addon>
+    <Addon AddonType="AddonType.End">
+        <Button Color="Color.Light" Clicked="@(()=>datePicker.ToggleAsync())">
+            <Icon Name="IconName.CalendarDay" />
+        </Button>
+    </Addon>
+</Addons>
+
 @code {
     private int currentCount = 0;
 
@@ -15,4 +26,5 @@
     {
         currentCount++;
     }
+    DatePicker<DateTime?> datePicker;
 }
