@@ -1,6 +1,6 @@
 ﻿@page "/fetchdataVacas"
 @using VacasCool.Data
-@inject WeatherForecastService ForecastService
+@inject VacaService vacaService
 
 <PageTitle>Vacas</PageTitle>
 
@@ -8,7 +8,7 @@
 
 <p>This component demonstrates fetching data from a service.</p>
 
-@if (forecasts == null)
+@if (vacas.Count == 0)
 {
     <p><em>Loading...</em></p>
 }
@@ -17,20 +17,20 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Raza</th>
+                <th>Peso (Kg)</th>
+                <th>Edad (Meses)</th>
+                <th>Vivo</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var vaca in vacas)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@vaca.Raza</td>
+                    <td>@vaca.Peso</td>
+                    <td>@vaca.Edad</td>
+                    <td>@vaca.Vivo</td>
                 </tr>
             }
         </tbody>
@@ -38,10 +38,10 @@ else
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
-
+    private List<Vaca> vacas = new List<Vaca>();
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+        var url = "https://vacas20231113212142.azurewebsites.net/Vacas";
+        vacas = await vacaService.ObtenerElementos(url);
     }
 }
