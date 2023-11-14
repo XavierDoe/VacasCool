@@ -2,6 +2,7 @@
 @using VacasCool.Data
 @inject WeatherForecastService ForecastService
 
+
 <PageTitle>Weather forecast</PageTitle>
 
 <h1>Trabajadores</h1>
@@ -17,22 +18,115 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Genero</th>
+                <th>Salario</th>
+                <th>Permisos</th>
+                <th>HistorialEmpleo</th>
+                <Div Flex="Flex.JustifyContent.Center">
+                    <Button Color="Color.Primary" Clicked="@ToggleModal">
+                        Agregar Trabajador
+                    </Button>
+
+                    <Modal @bind-Visible="@modalVisible">
+                        <ModalContent Centered Size="ModalSize.Large">
+                             <ModalHeader>
+                                 <ModalTitle>Trabajador</ModalTitle>
+                                 <CloseButton />
+                             </ModalHeader>
+                             <ModalBody>
+                                 <Form>
+                                     <Field>
+                                         <FieldLabel>
+                                             Nombre del Trabajador
+                                         </FieldLabel>
+                                         <FieldBody>
+                                             <TextEdit Placeholder="Ingresar nombre completo" />
+                                         </FieldBody>
+                                     </Field>
+                                     <Fields>
+                                         <Field>
+                                             <FieldLabel>
+                                                 Edad
+                                             </FieldLabel>
+                                             <FieldBody>
+                                                 <NumericPicker TValue="int?" Placeholder="Solo numeros (Enteros)" />
+                                                 
+                                             </FieldBody>
+                                         </Field>
+                                         <Field>
+                                             <FieldLabel>
+                                                 Salario
+                                             </FieldLabel>
+                                             <FieldBody>
+                                                 <NumericPicker TValue="decimal?" Placeholder="sin puntos, ejm(1999000)" />
+                                             </FieldBody>
+                                         </Field>
+                                     </Fields>
+                                     <Fields>
+                                         <Field>
+                                             <FieldLabel>
+                                                 Género
+                                             </FieldLabel>
+                                             <FieldBody>
+                                                 <Select TValue="string">
+                                                     <SelectItem>Hombre</SelectItem>
+                                                     <SelectItem>Mujer</SelectItem>
+                                                     <SelectItem>Prefiero no decirlo</SelectItem>
+                                                     <SelectItem>No binarie</SelectItem>
+                                                 </Select>
+                                             </FieldBody>
+                                         </Field>
+                                         <Field>
+                                             <FieldLabel>
+                                                   Permisos
+                                             </FieldLabel>
+                                             <FieldBody>
+                                                 <TextEdit Placeholder="" />
+                                             </FieldBody>
+                                         </Field>
+                                     </Fields>
+                                     <Field>
+                                         <FieldLabel>
+                                             Historial de empleo
+                                         </FieldLabel>
+                                         <FieldBody>
+                                             <MemoEdit Placeholder="describe los cargos que ha ejercido el trabajador a lo largo de su vida laboral" Rows="8" />
+                                         </FieldBody>
+                                     </Field>
+                                 </Form>
+                             </ModalBody>
+                             <ModalFooter>
+                                 <Button Color="Color.Primary">
+                                     <Icon Name="IconName.Add" Margin="Margin.Is2.FromEnd" /> Agregar trabajador
+                                 </Button>
+                             </ModalFooter>
+                         </ModalContent>
+                     </Modal>
+                 </Div>
+
+             </tr>
+            
         </thead>
         <tbody>
             @foreach (var forecast in forecasts)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>Xavier Yunku Kunno</td>
+                    <td>24</td>
+                    <td>1650000</td>
+                    <td>Prefiero no decirlo</td>
+                    <td>Todos los fines de semana</td>
+                    <td>Backend Java Developer, .NET </td>
+
+
+                    <Button Color="Color.Primary">
+                        <Icon Name="IconName.Add" Margin="Margin.Is2.FromEnd" /> Eliminar
+                        
+                    </Button>
                 </tr>
-            }
+            }    
         </tbody>
     </table>
 }
@@ -44,4 +138,14 @@ else
     {
         forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
     }
+
+    bool modalVisible = false;
+
+    Task ToggleModal()
+    {
+        modalVisible = !modalVisible;
+
+        return Task.CompletedTask;
+    }
+
 }
