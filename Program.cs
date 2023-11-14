@@ -13,6 +13,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<VacaService>();
+builder.Services.AddSingleton<InventarioService>();
 builder.Services
     .AddBlazorise(options =>
     {

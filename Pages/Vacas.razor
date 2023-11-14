@@ -6,7 +6,7 @@
 
 <h1>Vacas</h1>
 
-<p>This component demonstrates fetching data from a service.</p>
+<p>Listado de Vacas</p>
 
 @if (vacas.Count == 0)
 {
@@ -14,27 +14,59 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Raza</th>
-                <th>Peso (Kg)</th>
-                <th>Edad (Meses)</th>
-                <th>Vivo</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var vaca in vacas)
-            {
-                <tr>
-                    <td>@vaca.Raza</td>
-                    <td>@vaca.Peso</td>
-                    <td>@vaca.Edad</td>
-                    <td>@vaca.Vivo</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <Div Margin="Margin.IsAuto.OnX">
+        <Card>
+            <CardHeader Padding="Padding.Is0.FromBottom">
+                <CardTitle Flex="Flex.Column.AlignItems.Start">
+                    <Span TextWeight="TextWeight.Bold">Vea el estado y relación de las vacas</Span>
+                </CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Table Borderless>
+                 <TableHeader>
+                     <TableRow>
+                         <TableHeaderCell>Raza</TableHeaderCell>
+                         <TableHeaderCell>Edad (Meses)</TableHeaderCell>
+                         <TableHeaderCell>Padre</TableHeaderCell>
+                         <TableHeaderCell>Peso (Kg)</TableHeaderCell>
+                         <TableHeaderCell>Estado</TableHeaderCell>
+                         <TableHeaderCell>Acciones</TableHeaderCell>
+                     </TableRow>
+                 </TableHeader>
+                 @foreach (var vaca in vacas)
+                    {
+                        <TableBody>
+                            <TableRow>
+                                <TableRowCell>
+                                    @SimpleText("#", vaca.Raza)
+                                </TableRowCell>
+                                <TableRowCell>
+                                    @SimpleLink("#", (int) vaca.Edad)
+                                </TableRowCell>
+                                <TableRowCell>
+                                    @SimpleText("#", vaca.Padre)
+                                </TableRowCell>
+                                <TableRowCell>
+                                    @Peso((double) vaca.Peso)
+                                </TableRowCell>
+                                <TableRowCell>
+                                   @estado(vaca.Vivo)
+                                </TableRowCell>
+                                <TableRowCell TextAlignment="TextAlignment.Start">
+                                    <Button Type="ButtonType.Link" Color="Color.Light" Size="Size.Small">
+                                        <Icon Name="IconName.Edit" />
+                                    </Button>
+                                    <Button Type="ButtonType.Link" Color="Color.Light" Size="Size.Small">
+                                        <Icon Name="IconName.Delete" />
+                                    </Button>
+                                </TableRowCell>
+                            </TableRow>
+                        </TableBody>
+                    }
+                </Table>
+         </CardBody>
+     </Card>
+ </Div>
 }
 
 @code {
@@ -44,4 +76,33 @@ else
         var url = "https://vacas20231113212142.azurewebsites.net/Vacas";
         vacas = await vacaService.ObtenerElementos(url);
     }
+    private RenderFragment SimpleLink(string to, int label) => __builder =>
+    {
+        <Anchor To="@to" TextColor="TextColor.Dark" TextWeight="TextWeight.Bold">@label</Anchor>
+        @if (label >= 12)
+        {
+            <Span TextColor="TextColor.Muted" Display="Display.Block" Style="font-size: 0.85rem;">@($"{label / 12} años")</Span>
+        }
+    };
+
+    private RenderFragment SimpleText(string to, string label) => __builder =>
+    {
+        <Anchor To="@to" TextColor="TextColor.Dark" TextWeight="TextWeight.Bold">@label</Anchor>
+    };
+
+    private RenderFragment Peso(double peso) => __builder =>
+    {
+        <Span TextColor="TextColor.Dark" TextWeight="TextWeight.Bold">@($"{peso}")</Span>
+    };
+
+    private RenderFragment estado(bool status) => __builder =>
+    {
+        if (status)
+        {
+            <Badge Color="Color.Success">Viva</Badge>
+        } else
+        {
+            <Badge Color="Color.Danger">Muerta</Badge>
+        }
+    };
 }
