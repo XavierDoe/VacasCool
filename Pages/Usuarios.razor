@@ -1,47 +1,81 @@
 ﻿@page "/fetchdataUsuario"
 @using VacasCool.Data
-@inject WeatherForecastService ForecastService
+@inject TrabajadorService TrabajadorService;
+@using System.Net.Http.Json;
+@inject HttpClient httpClient;
+@using MudBlazor;
+
 
 <PageTitle>Weather forecast</PageTitle>
-
+<MudThemeProvider/>
 <h1>Trabajadores</h1>
 
-<p>Se mostrara el registro que se tiene de cada trabajador.</p>
+<MudTable Items="@Elements" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<Trabajador,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Lista de Empleados</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString1" Placeholder="Buscar" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Id</MudTh>
+        <MudTh>Nombre</MudTh>
+        <MudTh>Edad</MudTh>
+        <MudTh>Salario</MudTh>
+        <MudTh>Acciones</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.idTrabajador</MudTd>
+        <MudTd DataLabel="Nombre">@context.Nombre</MudTd>
+        <MudTd DataLabel="Edad">@context.Edad</MudTd>
+        <MudTd DataLabel="Salario">@context.Salario</MudTd>
+        <MudTd DataLabel="Acciones"><MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit"/></MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager RowsPerPageString="Elementos por Página:" InfoFormat="{first_item}-{last_item} de {all_items}" />
+    </PagerContent>
+</MudTable>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<div class="d-flex flex-wrap mt-4">
+    <MudSwitch @bind-Checked="@hover" Color="Color.Primary">Hover</MudSwitch>
+    <MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Dense</MudSwitch>
+    <MudSwitch @bind-Checked="@striped" Color="Color.Tertiary">Striped</MudSwitch>
+    <MudSwitch @bind-Checked="@bordered" Color="Color.Warning">Bordered</MudSwitch>
+    <MudSpacer />
+    <div style="min-width:200px;">
+        <MudText Inline="true" Class="align-self-center">Selección: @selectedItem1?.Nombre</MudText>
+    </div>
+</div>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private List<Trabajador> trabajador = new List<Trabajador>();
+    private Trabajador selectedItem1 = null;
+    private HashSet<Trabajador> selectedItems = new HashSet<Trabajador>();
+    private bool dense = false;
+    private bool hover = true;
+    private bool striped = false;
+    private bool bordered = false;
+    private string searchString1 = "";
+
+    private IEnumerable<Trabajador> Elements = new List<Trabajador>();
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+        var url = "https://vacas20231113212142.azurewebsites.net/Trabajadores";
+        Elements = await TrabajadorService.ObtenerElementos(url);
+    }
+
+    private bool FilterFunc1(Trabajador Trabajador) => FilterFunc(Trabajador, searchString1);
+
+    private bool FilterFunc(Trabajador Trabajador, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (Trabajador.Nombre.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (Trabajador.Permisos.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{Trabajador.Salario} {Trabajador.Edad}".Contains(searchString))
+            return true;
+        return false;
     }
 }

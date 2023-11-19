@@ -1,4 +1,5 @@
 ﻿@page "/counter"
+@using Blazorise;
 
 <PageTitle>Counter</PageTitle>
 
@@ -13,7 +14,7 @@
         <DatePicker @ref="@datePicker" TValue="DateTime?" />
     </Addon>
     <Addon AddonType="AddonType.End">
-        <Button Color="Color.Light" Clicked="@(()=>datePicker.ToggleAsync())">
+        <Button Color="Blazorise.Color.Light" Clicked="@(()=>datePicker.ToggleAsync())">
             <Icon Name="IconName.CalendarDay" />
         </Button>
     </Addon>

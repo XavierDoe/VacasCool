@@ -4,6 +4,7 @@ using VacasCool.Data;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<VacaService>();
 builder.Services.AddSingleton<InventarioService>();
+builder.Services.AddSingleton<TrabajadorService>();
+builder.Services.AddMudServices();
 builder.Services
     .AddBlazorise(options =>
     {

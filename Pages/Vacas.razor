@@ -1,6 +1,7 @@
 ﻿@page "/fetchdataVacas"
 @using VacasCool.Data
 @inject VacaService vacaService
+@using Blazorise;
 
 <PageTitle>Vacas</PageTitle>
 
@@ -14,7 +15,7 @@
 }
 else
 {
-    <Div Margin="Margin.IsAuto.OnX">
+    <Div Margin="Blazorise.Margin.IsAuto.OnX">
         <Card>
             <CardHeader Padding="Padding.Is0.FromBottom">
                 <CardTitle Flex="Flex.Column.AlignItems.Start">
@@ -53,10 +54,10 @@ else
                                    @estado(vaca.Vivo)
                                 </TableRowCell>
                                 <TableRowCell TextAlignment="TextAlignment.Start">
-                                    <Button Type="ButtonType.Link" Color="Color.Light" Size="Size.Small">
+                                    <Button Type="Blazorise.ButtonType.Link" Color="Blazorise.Color.Light" Size="Blazorise.Size.Small">
                                         <Icon Name="IconName.Edit" />
                                     </Button>
-                                    <Button Type="ButtonType.Link" Color="Color.Light" Size="Size.Small">
+                                    <Button Type="Blazorise.ButtonType.Link" Color="Blazorise.Color.Light" Size="Blazorise.Size.Small">
                                         <Icon Name="IconName.Delete" />
                                     </Button>
                                 </TableRowCell>
@@ -99,10 +100,10 @@ else
     {
         if (status)
         {
-            <Badge Color="Color.Success">Viva</Badge>
+            <Badge Color="Blazorise.Color.Success">Viva</Badge>
         } else
         {
-            <Badge Color="Color.Danger">Muerta</Badge>
+            <Badge Color="Blazorise.Color.Danger">Muerta</Badge>
         }
     };
 }
