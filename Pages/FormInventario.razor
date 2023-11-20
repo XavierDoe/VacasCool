@@ -1,0 +1,112 @@
+﻿@using MudBlazor;
+@using System.ComponentModel.DataAnnotations
+@using VacasCool.Data
+@inject InventarioService InventarioService
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <MudGrid>
+                <MudItem xs="12" sm="7">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudTextField Label="Nombre" HelperText="Max. 8 characters"
+                            @bind-Value="model.Nombre" For="@(() => model.Nombre)" />
+                            <MudTextField Label="Cantidad" Class="mt-3"
+                            @bind-Value="model.Cantidad" For="@(() => model.Cantidad)" InputType="InputType.Number" />
+                            <MudTextField Label="Precio" Class="mt-3"
+                            @bind-Value="model.Precio" For="@(() => model.Precio)" InputType="InputType.Number" />
+                            <MudTextField Label="Tipo de Articulo" Class="mt-3"
+                            @bind-Value="model.tipoArticulo" For="@(() => model.tipoArticulo)" InputType="InputType.Text" />
+                            <MudTextField Label="Descripción" HelperText="Descripción del objeto" Class="mt-3"
+                            @bind-Value="model.Descripcion" For="@(() => model.Descripcion)" InputType="InputType.Text" />
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="5">
+                    <MudPaper Class="pa-4 mud-height-full">
+                        <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
+                        @if (success)
+                        {
+                            <MudText Color="Color.Success">Success</MudText>
+                        }
+                        else
+                        {
+                            <MudText Color="@Color.Error">
+                                <ValidationSummary />
+                            </MudText>
+                        }
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.body2" Align="Align.Center">
+                        Fill out the form correctly to see the success message.
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+    RegisterAccountForm model = new RegisterAccountForm();
+    bool success;
+    private Inventario trab = new Inventario();
+
+    public class RegisterAccountForm
+    {
+        [Required]
+        public string Nombre { get; set; }
+
+        [Required]
+        public int Cantidad { get; set; }
+
+        [Required]
+        public string tipoArticulo { get; set; }
+
+        [Required]
+        public string Descripcion { get; set; }
+
+        [Required]
+        public double Precio { get; set; }
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (InventarioService.GetInventario() != null)
+            {
+                trab = InventarioService.GetInventario();
+                model.Nombre = trab.NombreArticulo;
+                model.Cantidad = (int)trab.Cantidad;
+                model.Precio = (double)trab.precio;
+                model.tipoArticulo = trab.tipoArticulo;
+                model.Descripcion = trab.descripcion;
+                InventarioService.SetInventario(null);
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        success = true;
+        StateHasChanged();
+    }
+}

@@ -1,31 +1,76 @@
 ﻿@page "/counter"
-@using Blazorise;
+@using MudBlazor;
+@using System.Net.Http.Json
+@using VacasCool.Data;
+@inject InventarioService InventarioService;
+@inject HttpClient httpClient
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Inventario</PageTitle>
 
-<h1>Counter</h1>
+<MudDataGrid T="Inventario" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+             Hideable="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Periodic Elements</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="Inventario" />
+        <PropertyColumn Property="x => x.NombreArticulo" Title="Nombre del Artículo" SortBy="@_sortBy" />
+        <PropertyColumn Property="x => x.tipoArticulo" Title="Tipo de Artículo" />
+        <PropertyColumn Property="x => x.precio" Title="Precio" />
+        <TemplateColumn CellClass="d-flex justify-end" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="Inventario" />
+    </PagerContent>
+</MudDataGrid>
 
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-<Addons>
-    <Addon AddonType="AddonType.Body">
-        <DatePicker @ref="@datePicker" TValue="DateTime?" />
-    </Addon>
-    <Addon AddonType="AddonType.End">
-        <Button Color="Blazorise.Color.Light" Clicked="@(()=>datePicker.ToggleAsync())">
-            <Icon Name="IconName.CalendarDay" />
-        </Button>
-    </Addon>
-</Addons>
+<div class="d-flex flex-wrap mt-4">
+    <MudSwitch @bind-Checked="@_sortNameByLength" Color="Color.Primary">Sort Name Column By Length</MudSwitch>
+</div>
 
 @code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
+    private IEnumerable<Inventario> Elements = new List<Inventario>();
+    private string _searchString;
+    private bool _sortNameByLength;
+    private List<string> _events = new();
+    // custom sort by name length
+    private Func<Inventario, object> _sortBy => x =>
     {
-        currentCount++;
+        if (_sortNameByLength)
+            return x.NombreArticulo.Length;
+        else
+            return x.NombreArticulo;
+    };
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<Inventario, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.descripcion.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.NombreArticulo.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (x.tipoArticulo.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.precio}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "https://vacas20231113212142.azurewebsites.net/Inventario";
+        Elements = await InventarioService.ObtenerElementos(url);
     }
-    DatePicker<DateTime?> datePicker;
 }

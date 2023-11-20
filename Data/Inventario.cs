@@ -7,10 +7,9 @@ namespace VacasCool.Data
         public ObjectId Id { get; set; }
         public String? NombreArticulo { get; set; }
         public int? Cantidad { get; set; }
-        public string IdInventario => IdVac(Id);
-        public String IdVac(ObjectId id)
-        {
-            return id.ToString();
-        }
+        public string IdInventario {  get; set; }
+        public String? tipoArticulo { get; set; }
+        public String descripcion { get; set; }
+        public double? precio { get; set; }
     }
 }
