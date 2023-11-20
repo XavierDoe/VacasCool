@@ -5,59 +5,29 @@
 
 <MudDialog>
     <DialogContent>
-        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
-            <DataAnnotationsValidator />
-            <MudGrid>
-                <MudItem xs="12" sm="7">
-                    <MudCard>
-                        <MudCardContent>
-                            <MudTextField Label="Nombre" HelperText="Max. 8 characters"
-                            @bind-Value="model.Nombre" For="@(() => model.Nombre)" />
-                            <MudTextField Label="Cantidad" Class="mt-3"
-                            @bind-Value="model.Cantidad" For="@(() => model.Cantidad)" InputType="InputType.Number" />
-                            <MudTextField Label="Precio" Class="mt-3"
-                            @bind-Value="model.Precio" For="@(() => model.Precio)" InputType="InputType.Number" />
-                            <MudTextField Label="Tipo de Articulo" Class="mt-3"
-                            @bind-Value="model.tipoArticulo" For="@(() => model.tipoArticulo)" InputType="InputType.Text" />
-                            <MudTextField Label="Descripción" HelperText="Descripción del objeto" Class="mt-3"
-                            @bind-Value="model.Descripcion" For="@(() => model.Descripcion)" InputType="InputType.Text" />
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
-                        </MudCardActions>
-                    </MudCard>
+        <MudCard>
+            <MudCardContent>
+                <MudTextField Label="Nombre"
+                @bind-Value="model.Nombre" For="@(() => model.Nombre)" />
+                <MudTextField Label="Cantidad" Class="mt-3"
+                @bind-Value="model.Cantidad" For="@(() => model.Cantidad)" InputType="InputType.Number" />
+                <MudTextField Label="Precio" Class="mt-3"
+                @bind-Value="model.Precio" For="@(() => model.Precio)" InputType="InputType.Number" />
+                <MudItem xs="12" sm="6" md="4">
+                    <MudAutocomplete T="string" Label="Tipo de Artículo" ResetValueOnEmptyText="true" @bind-Value="model.tipoArticulo" SearchFunc="@Search1" />
                 </MudItem>
-                <MudItem xs="12" sm="5">
-                    <MudPaper Class="pa-4 mud-height-full">
-                        <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
-                        @if (success)
-                        {
-                            <MudText Color="Color.Success">Success</MudText>
-                        }
-                        else
-                        {
-                            <MudText Color="@Color.Error">
-                                <ValidationSummary />
-                            </MudText>
-                        }
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudText Typo="Typo.body2" Align="Align.Center">
-                        Fill out the form correctly to see the success message.
-                    </MudText>
-                </MudItem>
-            </MudGrid>
-        </EditForm>
+                <MudTextField @ref="multilineReference" T="string" Label="Descripción" @bind-Value="model.Descripcion" Variant="Variant.Filled" Lines="3" Adornment="Adornment.End" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
+            </MudCardActions>
+        </MudCard>
     </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
-    </DialogActions>
 </MudDialog>
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private MudTextField<string> multilineReference;
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
@@ -76,12 +46,27 @@
         [Required]
         public string tipoArticulo { get; set; }
 
-        [Required]
         public string Descripcion { get; set; }
 
         [Required]
         public double Precio { get; set; }
 
+    }
+
+    private string[] states =
+    {
+        "Alimentos", "Medicina", "Carnes", "Plantas", "Equipos", "Suministros",
+    };
+
+    private async Task<IEnumerable<string>> Search1(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return states;
+        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 
     protected override async Task OnInitializedAsync()

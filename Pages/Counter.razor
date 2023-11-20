@@ -3,12 +3,13 @@
 @using System.Net.Http.Json
 @using VacasCool.Data;
 @inject InventarioService InventarioService;
+@inject IDialogService DialogService
 @inject HttpClient httpClient
 
 <PageTitle>Inventario</PageTitle>
 
-<MudDataGrid T="Inventario" MultiSelection="true" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
-             Hideable="true">
+<MudDataGrid T="Inventario" MultiSelection="false" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+             Hideable="true" >
     <ToolBarContent>
         <MudText Typo="Typo.h6">Periodic Elements</MudText>
         <MudSpacer />
@@ -20,9 +21,9 @@
         <PropertyColumn Property="x => x.NombreArticulo" Title="Nombre del Artículo" SortBy="@_sortBy" />
         <PropertyColumn Property="x => x.tipoArticulo" Title="Tipo de Artículo" />
         <PropertyColumn Property="x => x.precio" Title="Precio" />
-        <TemplateColumn CellClass="d-flex justify-end" Sortable="false" Filterable="false">
+        <TemplateColumn CellClass="d-flex justify-left" Title="Acción" Sortable="false" Filterable="false">
             <CellTemplate>
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                <MudIconButton @onclick="@( () => Actualizar(context.Item) )" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" />
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -30,16 +31,18 @@
         <MudDataGridPager T="Inventario" />
     </PagerContent>
 </MudDataGrid>
-
-<div class="d-flex flex-wrap mt-4">
-    <MudSwitch @bind-Checked="@_sortNameByLength" Color="Color.Primary">Sort Name Column By Length</MudSwitch>
-</div>
+<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+    Open Dialog
+</MudButton>
 
 @code {
     private IEnumerable<Inventario> Elements = new List<Inventario>();
     private string _searchString;
     private bool _sortNameByLength;
     private List<string> _events = new();
+    private List<Inventario> inventario = new List<Inventario>();
+    private Inventario selectedItem1 = null;
+    private HashSet<Inventario> selectedItems = new HashSet<Inventario>();
     // custom sort by name length
     private Func<Inventario, object> _sortBy => x =>
     {
@@ -68,9 +71,29 @@
         return false;
     };
 
+    private void OpenDialog()
+    {
+        DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
+
+        DialogService.Show<FormInventario>("Formulario Artículo", closeOnEscapeKey);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var url = "https://vacas20231113212142.azurewebsites.net/Inventario";
         Elements = await InventarioService.ObtenerElementos(url);
+    }
+
+    private void Actualizar(Inventario select)
+    {
+        if (select != null)
+        {
+            InventarioService.SetInventario(select);
+        }
+        OpenDialog();
+    }
+    void SelectedItemsChanged(HashSet<Inventario> items)
+    {
+        selectedItem1 = items.First();
     }
 }
