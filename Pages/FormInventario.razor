@@ -2,6 +2,7 @@
 @using System.ComponentModel.DataAnnotations
 @using VacasCool.Data
 @inject InventarioService InventarioService
+@inject ISnackbar SnackbarService
 
 <MudDialog>
     <DialogContent>
@@ -19,7 +20,7 @@
                 <MudTextField @ref="multilineReference" T="string" Label="Descripción" @bind-Value="model.Descripcion" Variant="Variant.Filled" Lines="3" Adornment="Adornment.End" />
             </MudCardContent>
             <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" OnClick="@Guardar" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
             </MudCardActions>
         </MudCard>
     </DialogContent>
@@ -87,6 +88,31 @@
         catch (Exception e)
         {
         }
+    }
+
+    private async Task Guardar()
+    {
+        Inventario inv = new Inventario();
+        inv.NombreArticulo = model.Nombre;
+        inv.precio = model.Precio;
+        inv.tipoArticulo = model.tipoArticulo;
+        inv.descripcion = model.Descripcion;
+        inv.Cantidad = model.Cantidad;
+        int result = await InventarioService.GuardarDatos(inv);
+        if (result == 200)
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            { "Text", "Guardado exitoso." },
+            { "Color", Color.Success }
+        });
+        } else
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            { "Text", "Ha ocurrido un error al guardar." },
+            { "Color", Color.Error }
+        });
+        }
+
     }
 
     private void OnValidSubmit(EditContext context)
