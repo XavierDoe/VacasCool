@@ -2,6 +2,7 @@
 @using System.ComponentModel.DataAnnotations
 @using VacasCool.Data
 @inject TrabajadorService TrabajadorService
+@inject ISnackbar SnackbarService
 
 <MudDialog>
     <DialogContent>
@@ -11,7 +12,7 @@
                 <MudItem xs="12" sm="7">
                     <MudCard>
                         <MudCardContent>
-                            <MudTextField Label="Nombre" HelperText="Max. 8 characters"
+                            <MudTextField Label="Nombre" HelperText="Min 5 Caracteres"
                             @bind-Value="model.Nombre" For="@(() => model.Nombre)" />
                             <MudTextField Label="Edad" Class="mt-3"
                             @bind-Value="model.Edad" For="@(() => model.Edad)" InputType="InputType.Number" />
@@ -23,16 +24,16 @@
                             @bind-Value="model.Historial" For="@(() => model.Historial)" InputType="InputType.Text" />
                         </MudCardContent>
                         <MudCardActions>
-                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
+                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" OnClick="@Guardar" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
                         </MudCardActions>
                     </MudCard>
                 </MudItem>
                 <MudItem xs="12" sm="5">
                     <MudPaper Class="pa-4 mud-height-full">
-                        <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
+                        <MudText Typo="Typo.subtitle2">Validación</MudText>
                         @if (success)
                         {
-                            <MudText Color="Color.Success">Success</MudText>
+                            <MudText Color="Color.Success">Completado</MudText>
                         }
                         else
                         {
@@ -44,14 +45,14 @@
                 </MudItem>
                 <MudItem xs="12">
                     <MudText Typo="Typo.body2" Align="Align.Center">
-                        Fill out the form correctly to see the success message.
+                        Llene por favor
                     </MudText>
                 </MudItem>
             </MudGrid>
         </EditForm>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton OnClick="Cancel">Cancelar</MudButton>
         <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
     </DialogActions>
 </MudDialog>
@@ -67,18 +68,22 @@
     public class RegisterAccountForm
     {
         [Required]
-        [StringLength(8, ErrorMessage = "Name length can't be more than 8.")]
+        [StringLength(50, ErrorMessage = "Nombre demasiado corto", MinimumLength = 5)]
         public string Nombre { get; set; }
 
         [Required]
         public double Edad { get; set; }
 
         [Required]
-        [StringLength(1, ErrorMessage = "Password must be at least 8 characters long.", MinimumLength = 1)]
+        [StringLength(1, ErrorMessage = "Use una letra M o F", MinimumLength = 1)]
         public string Sexo { get; set; }
 
         [Required]
         public string Historial { get; set; }
+
+        public string Permisos { get; set; }
+        public string Certificaciones { get; set; }
+        public string idTrabajador { get; set; }
 
         [Required]
         public double Salario { get; set; }
@@ -96,12 +101,71 @@
                 model.Edad = (double)trab.Edad;
                 model.Salario = (double)trab.Salario;
                 model.Sexo = trab.Sexo;
+                model.Permisos = trab.Permisos;
+                model.Certificaciones = trab.Certificaciones;
+                model.idTrabajador = trab.idTrabajador;
                 model.Historial = trab.HistoriaEmpleo;
                 TrabajadorService.SetTrabajador(null);
             }
         }
         catch (Exception e)
         {
+        }
+    }
+
+    private async Task Guardar()
+    {
+        Trabajador inv = new Trabajador();
+        inv.Nombre = model.Nombre;
+        inv.Sexo = model.Sexo;
+        inv.HistoriaEmpleo = model.Historial;
+        inv.Salario = model.Salario;
+        inv.Certificaciones = model.Certificaciones;
+        inv.idTrabajador = model.idTrabajador;
+        inv.Edad = model.Edad;
+        inv.Permisos = model.Permisos;
+        if (!String.IsNullOrEmpty(model.Nombre) && !String.IsNullOrEmpty(model.Sexo))
+        {
+            if (!String.IsNullOrEmpty(model.idTrabajador))
+            {
+                int result = await TrabajadorService.ActualizarDatos(model.idTrabajador, inv);
+                if (result == 200)
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Actualización exitosa." },
+                    { "Color", Color.Success } });
+                    MudDialog.Close(DialogResult.Ok(true));
+                }
+                else
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Ha ocurrido un error al guardar." },
+                    { "Color", Color.Error } });
+                }
+            }
+            else
+            {
+                int result = await TrabajadorService.GuardarDatos(inv);
+                if (result == 200)
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Guardado exitoso." },
+                    { "Color", Color.Success } });
+                    MudDialog.Close(DialogResult.Ok(true));
+                }
+                else
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Ha ocurrido un error al guardar." },
+                    { "Color", Color.Error } });
+                }
+            }
+        }
+        else
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            { "Text", "Parametros incompletos." },
+            { "Color", Color.Warning } });
         }
     }
 

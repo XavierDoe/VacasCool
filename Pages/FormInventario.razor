@@ -52,6 +52,8 @@
         [Required]
         public double Precio { get; set; }
 
+        public string id { get; set; }
+
     }
 
     private string[] states =
@@ -82,6 +84,7 @@
                 model.Precio = (double)trab.precio;
                 model.tipoArticulo = trab.tipoArticulo;
                 model.Descripcion = trab.descripcion;
+                model.id = trab.IdInventario;
                 InventarioService.SetInventario(null);
             }
         }
@@ -100,20 +103,36 @@
         inv.Cantidad = model.Cantidad;
         if (!String.IsNullOrEmpty(model.Nombre) && !String.IsNullOrEmpty(model.tipoArticulo))
         {
-            int result = await InventarioService.GuardarDatos(inv);
-            if (result == 200)
+            if(!String.IsNullOrEmpty(model.id))
             {
-                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
-            { "Text", "Guardado exitoso." },
-            { "Color", Color.Success }
-            });
-            }
-            else
+                int result = await InventarioService.ActualizarDatos(model.id, inv);
+                if (result == 200)
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Actualización exitosa." },
+                    { "Color", Color.Success } });
+                }
+                else
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Ha ocurrido un error al guardar." },
+                    { "Color", Color.Error } });
+                }
+            } else
             {
-                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
-            { "Text", "Ha ocurrido un error al guardar." },
-            { "Color", Color.Error }
-        });
+                int result = await InventarioService.GuardarDatos(inv);
+                if (result == 200)
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Guardado exitoso." },
+                    { "Color", Color.Success } });
+                }
+                else
+                {
+                    SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Ha ocurrido un error al guardar." },
+                    { "Color", Color.Error } });
+                }
             }
         } else
         {
