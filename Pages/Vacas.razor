@@ -22,14 +22,24 @@
         <PropertyColumn Property="x => x.Edad" Title="Edad" />    
         <PropertyColumn Property="x => x.Padre" Title="Padre" />
         <PropertyColumn Property="x => x.Peso" Title="Peso" />
-        <PropertyColumn Property="x => x.HistoriaVac" Title="Historial de vacunacion" />
-        <PropertyColumn Property="x => x.InfoParto" Title="Informacion de parto" />
+        <TemplateColumn CellClass="d-flex justify-left" Title="Gestion de salud" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <div class="d-flex flex-column">
+                    <MudButton @onclick="OpenDialog2" Variant="Variant.Filled" Color="Color.Primary">
+                        Ver gestion de salud
+                    </MudButton>
 
-        <TemplateColumn CellClass="d-flex justify-left" Title="Acción" Sortable="false" Filterable="false">
+                 </div>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn CellClass="d-flex justify-end" Title="Acción" Sortable="false" Filterable="false">
             <CellTemplate>
                 <MudIconButton @onclick="@( () => Actualizar(context.Item) )" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" />
             </CellTemplate>
         </TemplateColumn>
+
+       
+        
     </Columns>
     <PagerContent>
         <MudDataGridPager T="Vaca" />
@@ -44,7 +54,7 @@
     private string _searchString;
     private bool _sortNameByLength;
     private List<string> _events = new();
-    private List<Vaca> inventario = new List<Vaca>();
+    private List<Vaca> vacas = new List<Vaca>();
     private Vaca selectedItem1 = null;
     private HashSet<Vaca> selectedItems = new HashSet<Vaca>();
     // custom sort by name length
@@ -92,7 +102,12 @@
         Elements = await VacaService.ObtenerElementos(url);
     } 
 
-    
+    private void OpenDialog2()
+    {
+        DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
+
+        DialogService.Show<FormVacas>("Gestion de salud", closeOnEscapeKey);
+    }
 
     private void Actualizar(Vaca select)
     {
@@ -100,7 +115,7 @@
         
             VacaService.SetVaca(select);
         }
-      //  OpenDialog();
+       OpenDialog();
     }
     void SelectedItemsChanged(HashSet<Vaca> items)
     {
