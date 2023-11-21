@@ -8,7 +8,7 @@
     <DialogContent>
         <MudCard>
             <MudCardContent>
-                <MudTextField Label="Nombre"
+                <MudTextField Label="Nombre" HelperText="Max. 8 characters"
                 @bind-Value="model.Nombre" For="@(() => model.Nombre)" />
                 <MudTextField Label="Cantidad" Class="mt-3"
                 @bind-Value="model.Cantidad" For="@(() => model.Cantidad)" InputType="InputType.Number" />
@@ -98,21 +98,29 @@
         inv.tipoArticulo = model.tipoArticulo;
         inv.descripcion = model.Descripcion;
         inv.Cantidad = model.Cantidad;
-        int result = await InventarioService.GuardarDatos(inv);
-        if (result == 200)
+        if (!String.IsNullOrEmpty(model.Nombre) && !String.IsNullOrEmpty(model.tipoArticulo))
         {
-            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            int result = await InventarioService.GuardarDatos(inv);
+            if (result == 200)
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
             { "Text", "Guardado exitoso." },
             { "Color", Color.Success }
-        });
-        } else
-        {
-            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            });
+            }
+            else
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
             { "Text", "Ha ocurrido un error al guardar." },
             { "Color", Color.Error }
         });
+            }
+        } else
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            { "Text", "Parametros incompletos." },
+            { "Color", Color.Warning } });
         }
-
     }
 
     private void OnValidSubmit(EditContext context)

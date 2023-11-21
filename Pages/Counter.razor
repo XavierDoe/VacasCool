@@ -11,7 +11,7 @@
 <MudDataGrid T="Inventario" MultiSelection="false" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
              Hideable="true" >
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Periodic Elements</MudText>
+        <MudText Typo="Typo.h6">Lista de Articulos en la Empresa</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -31,8 +31,8 @@
         <MudDataGridPager T="Inventario" />
     </PagerContent>
 </MudDataGrid>
-<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
-    Open Dialog
+<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Style="height: 60px;">
+    Guardar un nuevo artículo
 </MudButton>
 
 @code {
