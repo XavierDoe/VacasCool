@@ -1,0 +1,130 @@
+﻿@using MudBlazor;
+@using System.ComponentModel.DataAnnotations
+@using VacasCool.Data
+@inject VacaService VacaService
+@inject ISnackbar SnackbarService
+
+<MudDialog>
+    <DialogContent>
+        <MudCard>
+            <MudCardContent>
+                <MudTextField Label="Raza"
+                @bind-Value="model.Raza" For="@(() => model.Raza)" />
+                <MudTextField Label="Edad" Class="mt-3"
+                @bind-Value="model.Edad" For="@(() => model.Edad)" InputType="InputType.Number" />
+                <MudTextField Label="Padre" Class="mt-3"
+                @bind-Value="model.Padre" For="@(() => model.Padre)" />
+                <MudTextField Label="Peso" Class="mt-3"
+                @bind-Value="model.Peso" For="@(() => model.Peso)" InputType="InputType.Number" />
+                <MudTextField Label="Historial Vacunacion" Class="mt-3"
+                @bind-Value="model.HistoriaVac" For="@(() => model.HistoriaVac)" InputType="InputType.Number" />
+                <MudTextField Label="Informacion de parto" Class="mt-3"
+                @bind-Value="model.InfoParto" For="@(() => model.InfoParto)" InputType="InputType.Number" />
+                
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit" OnClick="@Guardar" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private MudTextField<string> multilineReference;
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+    RegisterAccountForm model = new RegisterAccountForm();
+    bool success;
+    private Vaca vac = new Vaca();
+
+    public class RegisterAccountForm
+    {
+        [Required]
+        public string? Raza { get; set; }
+        [Required]
+        public double? Edad { get; set; }
+        [Required]
+        public string Padre { get; set; }
+        [Required]
+        public double? Peso { get; set; }
+        [Required]
+        public bool Vivo { get; set; }
+        [Required]
+        public string HistoriaVac { get; set; }
+        [Required]
+        public string InfoParto { get; set; }
+
+    }
+
+    private string[] states =
+    {
+        "Alimentos", "Medicina", "Carnes", "Plantas", "Equipos", "Suministros",
+    };
+
+    private async Task<IEnumerable<string>> Search1(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+        await Task.Delay(5);
+
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return states;
+        return states.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (VacaService.GetVaca() != null)
+            {
+                vac = VacaService.GetVaca();
+
+                model.Raza = vac.Raza;
+                model.Edad = (int)vac.Edad;
+                model.Padre = vac.Padre;
+                model.Peso = (double)vac.Peso;
+                model.InfoParto = vac.InfoParto;
+                model.HistoriaVac = vac.HistoriaVac;
+                VacaService.SetVaca(null);
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    private async Task Guardar()
+    {
+        Vaca vaca = new Vaca();
+        vaca.Raza = model.Raza;
+        vaca.Edad = model.Edad;
+        vaca.Padre = model.Padre;
+        vaca.Peso = model.Peso;
+        vaca.HistoriaVac = model.HistoriaVac;
+        vaca.InfoParto = model.InfoParto;
+        int result = await VacaService.GuardarDatos(vaca);
+        if (result == 200)
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            { "Text", "Guardado exitoso." },
+            { "Color", Color.Success }
+        });
+        } else
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            { "Text", "Ha ocurrido un error al guardar." },
+            { "Color", Color.Error }
+        });
+        }
+
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        success = true;
+        StateHasChanged();
+    }
+}
