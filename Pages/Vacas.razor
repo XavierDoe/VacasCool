@@ -24,6 +24,8 @@
         <PropertyColumn Property="x => x.Peso" Title="Peso" />
         <PropertyColumn Property="x => x.HistoriaVac" Title="Historial de vacunacion" />
         <PropertyColumn Property="x => x.InfoParto" Title="Informacion de parto" />
+        <PropertyColumn Property="x => x.Vivo" Title="Estado" />
+        
 
         <TemplateColumn CellClass="d-flex justify-left" Title="Acción" Sortable="false" Filterable="false">
             <CellTemplate>
@@ -76,6 +78,9 @@
         if ($"{x.Edad}".Contains(_searchString))
             return true;
 
+        if ($"{x.Vivo}".Contains(_searchString))
+            return true;
+        
         return false;
     };
 
@@ -99,9 +104,12 @@
         if (select != null){
         
             VacaService.SetVaca(select);
+
+            
         }
-       OpenDialog2();
+        OpenDialog2();
     }
+
     void SelectedItemsChanged(HashSet<Vaca> items)
     {
         selectedItem1 = items.First();

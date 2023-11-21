@@ -18,6 +18,11 @@
                 @bind-Value="model.Peso" For="@(() => model.Peso)" InputType="InputType.Number" />
                 <MudTextField @ref="multilineReference" T="string" Label="Historial de vacunacion" @bind-Value="model.HistoriaVac" Variant="Variant.Filled" Lines="3" Adornment="Adornment.End" />
                 <MudTextField @ref="multilineReference" T="string" Label="Informacion de parto" @bind-Value="model.InfoParto" Variant="Variant.Filled" Lines="3" Adornment="Adornment.End" />
+                <MudCheckBox Label="Viva" Class="mt-3" @bind-Checked="@Basic_CheckBox1"></MudCheckBox>
+                <MudCheckBox Label="Muerta" @bind-Checked="@Basic_CheckBox2" Color="Color.Primary"></MudCheckBox>
+                <MudCheckBox @bind-Checked="@Basic_CheckBox3" Color="Color.Secondary"></MudCheckBox>
+                <MudCheckBox @bind-Checked="@Basic_CheckBox4" Disabled="true"></MudCheckBox>
+               
             </MudCardContent>
             <MudCardActions>
                 <MudButton ButtonType="ButtonType.Submit" OnClick="@Guardar" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
@@ -35,6 +40,13 @@
     RegisterAccountForm model = new RegisterAccountForm();
     bool success;
     private Vaca vac = new Vaca();
+
+
+    public bool Basic_CheckBox1 { get; set; } = true;
+    public bool Basic_CheckBox2 { get; set; } = false;
+    public bool Basic_CheckBox3 { get; set; } = false;
+    public bool Basic_CheckBox4 { get; set; } = true;
+
 
     public class RegisterAccountForm
     {
@@ -54,8 +66,8 @@
         public string InfoParto { get; set; }
 
     }
-     
-    
+
+
     private string[] states =
     {
         "Brucelosis bovina", "Campilobacteriosis genital bovina", "Diarrea Viral Bovina", "Dermatosis Nodular Contagiosa",
@@ -88,6 +100,7 @@
                 model.Peso = vac.Peso;
                 model.InfoParto = vac.InfoParto;
                 model.HistoriaVac = vac.HistoriaVac;
+                model.Vivo = vac.Vivo;
                 VacaService.SetVaca(null);
             }
         }
@@ -105,6 +118,7 @@
         vaca.Peso = model.Peso;
         vaca.HistoriaVac = model.HistoriaVac;
         vaca.InfoParto = model.InfoParto;
+        vaca.Vivo = model.Vivo;
         if (!String.IsNullOrEmpty(model.Raza))
         {
             int result = await VacaService.GuardarDatos(vaca);
