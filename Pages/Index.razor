@@ -2,6 +2,7 @@
 @using MudBlazor;
 @using VacasCool.Data
 @inject InventarioService inventarioService;
+@inject ISnackbar SnackbarService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -51,7 +52,7 @@
                                         <MudText Typo="Typo.body2">@item.descripcion</MudText>
                                     </MudCardContent>
                                     <MudCardActions>
-                                        <MudButton Variant="Variant.Text" Color="Color.Primary">Comprar</MudButton>
+                                        <MudButton Variant="Variant.Text" Color="Color.Primary" @onclick="@( () => Vender(item.IdInventario, item) )">Comprar</MudButton>
                                         <MudButton Variant="Variant.Text" Disabled Color="Color.Primary">Cantidad: @item.Cantidad</MudButton>
                                     </MudCardActions>
                                 </MudCard>
@@ -90,5 +91,23 @@
             var x when x < 2500 => Color.Tertiary,
             _ => Color.Error
         };
+    }
+
+    private async Task Vender(String id,Inventario model)
+    {
+        model.Cantidad = model.Cantidad - 1;
+        int result = await inventarioService.ActualizarDatos(id, model);
+        if (result == 200)
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Venta exitosa." },
+                    { "Color", Color.Success } });
+        }
+        else
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Ha ocurrido un error al vender." },
+                    { "Color", Color.Error } });
+        }
     }
 }

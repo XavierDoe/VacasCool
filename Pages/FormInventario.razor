@@ -21,6 +21,7 @@
             </MudCardContent>
             <MudCardActions>
                 <MudButton ButtonType="ButtonType.Submit" OnClick="@Guardar" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" OnClick="@Eliminar" Disabled="@(Eliminacion)" Variant="Variant.Filled" Color="Color.Error" FullWidth="true" Class="ml-auto">Eliminar</MudButton>
             </MudCardActions>
         </MudCard>
     </DialogContent>
@@ -35,6 +36,7 @@
     RegisterAccountForm model = new RegisterAccountForm();
     bool success;
     private Inventario trab = new Inventario();
+    bool Eliminacion = true;
 
     public class RegisterAccountForm
     {
@@ -86,6 +88,10 @@
                 model.Descripcion = trab.descripcion;
                 model.id = trab.IdInventario;
                 InventarioService.SetInventario(null);
+                if (!String.IsNullOrEmpty(model.id))
+                {
+                    Eliminacion = false;
+                }
             }
         }
         catch (Exception e)
@@ -139,6 +145,27 @@
             SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
             { "Text", "Parametros incompletos." },
             { "Color", Color.Warning } });
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        if (!String.IsNullOrEmpty(model.id))
+        {
+            int result = await InventarioService.EliminarDatos(model.id);
+            if (result == 200)
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Eliminación exitosa." },
+                    { "Color", Color.Success } });
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Ha ocurrido un error al eliminar." },
+                    { "Color", Color.Error } });
+            }
         }
     }
 

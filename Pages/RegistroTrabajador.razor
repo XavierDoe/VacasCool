@@ -18,13 +18,14 @@
                             @bind-Value="model.Edad" For="@(() => model.Edad)" InputType="InputType.Number" />
                             <MudTextField Label="Salario" Class="mt-3"
                             @bind-Value="model.Salario" For="@(() => model.Salario)" InputType="InputType.Number" />
-                            <MudTextField Label="Sexo" HelperText="Choose a strong password" Class="mt-3"
+                            <MudTextField Label="Sexo" HelperText="Salario en numeros" Class="mt-3"
                             @bind-Value="model.Sexo" For="@(() => model.Sexo)" InputType="InputType.Text" />
-                            <MudTextField Label="Historial" HelperText="Repeat the password" Class="mt-3"
+                            <MudTextField Label="Historial" HelperText="Tiempo trabajando" Class="mt-3"
                             @bind-Value="model.Historial" For="@(() => model.Historial)" InputType="InputType.Text" />
                         </MudCardContent>
                         <MudCardActions>
                             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" OnClick="@Guardar" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
+                            <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Disabled = "@(Eliminacion)" OnClick="@Eliminar" Color="Color.Error" FullWidth="true" Class="ml-auto">Eliminar</MudButton>
                         </MudCardActions>
                     </MudCard>
                 </MudItem>
@@ -64,6 +65,7 @@
     RegisterAccountForm model = new RegisterAccountForm();
     bool success;
     private Trabajador trab = new Trabajador();
+    bool Eliminacion = true;
 
     public class RegisterAccountForm
     {
@@ -106,10 +108,44 @@
                 model.idTrabajador = trab.idTrabajador;
                 model.Historial = trab.HistoriaEmpleo;
                 TrabajadorService.SetTrabajador(null);
+                if (!String.IsNullOrEmpty(model.idTrabajador))
+                {
+                    Eliminacion = false;
+                }
             }
         }
         catch (Exception e)
         {
+        }
+    }
+
+    private async Task Eliminar()
+    {
+        Trabajador inv = new Trabajador();
+        inv.Nombre = model.Nombre;
+        inv.Sexo = model.Sexo;
+        inv.HistoriaEmpleo = model.Historial;
+        inv.Salario = model.Salario;
+        inv.Certificaciones = model.Certificaciones;
+        inv.idTrabajador = model.idTrabajador;
+        inv.Edad = model.Edad;
+        inv.Permisos = model.Permisos;
+        if (!String.IsNullOrEmpty(model.idTrabajador))
+        {
+            int result = await TrabajadorService.EliminarDatos(model.idTrabajador);
+            if (result == 200)
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Eliminación exitosa." },
+                    { "Color", Color.Success } });
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                    { "Text", "Ha ocurrido un error al eliminar." },
+                    { "Color", Color.Error } });
+            }
         }
     }
 
