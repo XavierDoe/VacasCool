@@ -1,77 +1,47 @@
 ﻿@page "/fetchdata"
 @using VacasCool.Data
-@inject InventarioService InventarioService;
-@using System.Net.Http.Json;
-@inject HttpClient httpClient;
-@using MudBlazor;
-
+@inject WeatherForecastService ForecastService
 
 <PageTitle>Weather forecast</PageTitle>
-<MudThemeProvider />
+
 <h1>Inventario</h1>
 
-<MudTable Items="@Elements" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<Inventario,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Lista de Producto</MudText>
-        <MudSpacer />
-        <MudTextField @bind-Value="searchString1" Placeholder="Buscar" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh>Id</MudTh>
-        <MudTh>Producto</MudTh>
-        <MudTh>Cantidad</MudTh>
-        <MudTh>Acciones</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Id">@context.IdInventario</MudTd>
-        <MudTd DataLabel="Nombre">@context.NombreArticulo</MudTd>
-        <MudTd DataLabel="Edad">@context.Cantidad</MudTd>
-        <MudTd DataLabel="Acciones"><MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" /></MudTd>
-    </RowTemplate>
-    <PagerContent>
-        <MudTablePager RowsPerPageString="Elementos por Página:" InfoFormat="{first_item}-{last_item} de {all_items}" />
-    </PagerContent>
-</MudTable>
+<p>Aqui se mostrara el inventario que se tiene actualmente de los productos de la finca.</p>
 
-<div class="d-flex flex-wrap mt-4">
-    <MudSwitch @bind-Checked="@hover" Color="Color.Primary">Hover</MudSwitch>
-    <MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Dense</MudSwitch>
-    <MudSwitch @bind-Checked="@striped" Color="Color.Tertiary">Striped</MudSwitch>
-    <MudSwitch @bind-Checked="@bordered" Color="Color.Warning">Bordered</MudSwitch>
-    <MudSpacer />
-    <div style="min-width:200px;">
-        <MudText Inline="true" Class="align-self-center">Selección: @selectedItem1?.NombreArticulo</MudText>
-    </div>
-</div>
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private List<Inventario> trabajador = new List<Inventario>();
-    private Inventario selectedItem1 = null;
-    private HashSet<Inventario> selectedItems = new HashSet<Inventario>();
-    private bool dense = false;
-    private bool hover = true;
-    private bool striped = false;
-    private bool bordered = false;
-    private string searchString1 = "";
-
-    private IEnumerable<Inventario> Elements = new List<Inventario>();
+    private WeatherForecast[]? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = "https://vacas20231113212142.azurewebsites.net/Inventario";
-        Elements = await InventarioService.ObtenerElementos(url);
-    }
-
-    private bool FilterFunc1(Inventario Inventario) => FilterFunc(Inventario, searchString1);
-
-    private bool FilterFunc(Inventario Inventario, string searchString)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (Inventario.NombreArticulo.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if ($"{Inventario.Cantidad} {Inventario.Cantidad}".Contains(searchString))
-            return true;
-        return false;
+        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
     }
 }
