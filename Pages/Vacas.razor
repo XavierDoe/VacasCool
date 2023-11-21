@@ -35,7 +35,7 @@
         <MudDataGridPager T="Vaca" />
     </PagerContent>
 </MudDataGrid>
-<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+<MudButton @onclick="OpenDialog2" Variant="Variant.Filled" Color="Color.Primary">
     Registrar Vaca
 </MudButton>
 
@@ -79,7 +79,7 @@
         return false;
     };
 
-    private void OpenDialog()
+    private void OpenDialog2()
     {
         DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
 
@@ -100,7 +100,7 @@
         
             VacaService.SetVaca(select);
         }
-      //  OpenDialog();
+       OpenDialog2();
     }
     void SelectedItemsChanged(HashSet<Vaca> items)
     {
