@@ -16,11 +16,13 @@
                 @bind-Value="model.Padre" For="@(() => model.Padre)" />
                 <MudTextField Label="Peso" Class="mt-3"
                 @bind-Value="model.Peso" For="@(() => model.Peso)" InputType="InputType.Number" />
-                <MudTextField Label="Historial Vacunacion" Class="mt-3"
-                @bind-Value="model.HistoriaVac" For="@(() => model.HistoriaVac)" InputType="InputType.Number" />
-                <MudTextField Label="Informacion de parto" Class="mt-3"
-                @bind-Value="model.InfoParto" For="@(() => model.InfoParto)" InputType="InputType.Number" />
-                
+                <MudTextField @ref="multilineReference" T="string" Label="Historial de vacunacion" @bind-Value="model.HistoriaVac" Variant="Variant.Filled" Lines="3" Adornment="Adornment.End" />
+                <MudTextField @ref="multilineReference" T="string" Label="Informacion de parto" @bind-Value="model.InfoParto" Variant="Variant.Filled" Lines="3" Adornment="Adornment.End" />
+                <MudCheckBox Label="Viva" Class="mt-3" @bind-Checked="@Basic_CheckBox1"></MudCheckBox>
+                <MudCheckBox Label="Muerta" @bind-Checked="@Basic_CheckBox2" Color="Color.Primary"></MudCheckBox>
+                <MudCheckBox @bind-Checked="@Basic_CheckBox3" Color="Color.Secondary"></MudCheckBox>
+                <MudCheckBox @bind-Checked="@Basic_CheckBox4" Disabled="true"></MudCheckBox>
+               
             </MudCardContent>
             <MudCardActions>
                 <MudButton ButtonType="ButtonType.Submit" OnClick="@Guardar" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Class="ml-auto">Registrar</MudButton>
@@ -38,6 +40,13 @@
     RegisterAccountForm model = new RegisterAccountForm();
     bool success;
     private Vaca vac = new Vaca();
+
+
+    public bool Basic_CheckBox1 { get; set; } = true;
+    public bool Basic_CheckBox2 { get; set; } = false;
+    public bool Basic_CheckBox3 { get; set; } = false;
+    public bool Basic_CheckBox4 { get; set; } = true;
+
 
     public class RegisterAccountForm
     {
@@ -58,9 +67,12 @@
 
     }
 
+
     private string[] states =
     {
-        "Alimentos", "Medicina", "Carnes", "Plantas", "Equipos", "Suministros",
+        "Brucelosis bovina", "Campilobacteriosis genital bovina", "Diarrea Viral Bovina", "Dermatosis Nodular Contagiosa",
+        "Encefalopatía Espongiforme Bovina", "Estomatitis vesicular", "Fiebre Aftosa", "Fiebre del Valle del Rift", 
+        "Lengua Azul", "Leucosis Bovina Enzoótica", "Peste Bovina", " Perineumonia Contagiosa Bovina", "Rinotraqueítis infecciosa bovina", "Tricomonosis bovina", "Tuberculosis",
     };
 
     private async Task<IEnumerable<string>> Search1(string value)
@@ -83,11 +95,12 @@
                 vac = VacaService.GetVaca();
 
                 model.Raza = vac.Raza;
-                model.Edad = (int)vac.Edad;
+                model.Edad = vac.Edad;
                 model.Padre = vac.Padre;
-                model.Peso = (double)vac.Peso;
+                model.Peso = vac.Peso;
                 model.InfoParto = vac.InfoParto;
                 model.HistoriaVac = vac.HistoriaVac;
+                model.Vivo = vac.Vivo;
                 VacaService.SetVaca(null);
             }
         }
@@ -105,19 +118,30 @@
         vaca.Peso = model.Peso;
         vaca.HistoriaVac = model.HistoriaVac;
         vaca.InfoParto = model.InfoParto;
-        int result = await VacaService.GuardarDatos(vaca);
-        if (result == 200)
+        vaca.Vivo = model.Vivo;
+        if (!String.IsNullOrEmpty(model.Raza))
         {
-            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            int result = await VacaService.GuardarDatos(vaca);
+            if (result == 200)
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
             { "Text", "Guardado exitoso." },
             { "Color", Color.Success }
-        });
-        } else
-        {
-            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            });
+            }
+            else
+            {
+                SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
             { "Text", "Ha ocurrido un error al guardar." },
             { "Color", Color.Error }
         });
+            }
+        }
+        else
+        {
+            SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+            { "Text", "Parametros incompletos." },
+            { "Color", Color.Warning } });
         }
 
     }

@@ -18,7 +18,7 @@
         public async Task<int> GuardarDatos(Vaca vaca)
         {
             // Realizar una solicitud POST a la API para guardar los datos
-            string url = "https://vacas20231113212142.azurewebsites.net/Inventario";
+            string url = "https://vacas20231113212142.azurewebsites.net/Vacas";
             HttpResponseMessage response = await _httpClient.PostAsJsonAsync(url, vaca);
 
             if (response.IsSuccessStatusCode)
