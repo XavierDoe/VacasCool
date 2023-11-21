@@ -1,109 +1,111 @@
 ﻿@page "/fetchdataVacas"
-@using VacasCool.Data
-@inject VacaService vacaService
-@using Blazorise;
+@using MudBlazor;
+@using System.Net.Http.Json
+@using VacasCool.Data;
+@inject VacaService VacaService;
+@inject IDialogService DialogService;
+@inject HttpClient httpClient;
 
 <PageTitle>Vacas</PageTitle>
 
-<h1>Vacas</h1>
+<MudDataGrid T="Vaca" MultiSelection="false" Items="@Elements" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter"
+             Hideable="true" >
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Lista de Vacas</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="Vaca" />
+        <PropertyColumn Property="x => x.Raza" Title="Raza" SortBy="@_sortBy" />
+        <PropertyColumn Property="x => x.Edad" Title="Edad" />    
+        <PropertyColumn Property="x => x.Padre" Title="Padre" />
+        <PropertyColumn Property="x => x.Peso" Title="Peso" />
+        <PropertyColumn Property="x => x.HistoriaVac" Title="Historial de vacunacion" />
+        <PropertyColumn Property="x => x.InfoParto" Title="Informacion de parto" />
 
-<p>Listado de Vacas</p>
-
-@if (vacas.Count == 0)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <Div Margin="Blazorise.Margin.IsAuto.OnX">
-        <Card>
-            <CardHeader Padding="Padding.Is0.FromBottom">
-                <CardTitle Flex="Flex.Column.AlignItems.Start">
-                    <Span TextWeight="TextWeight.Bold">Vea el estado y relación de las vacas</Span>
-                </CardTitle>
-            </CardHeader>
-            <CardBody>
-                <Table Borderless>
-                 <TableHeader>
-                     <TableRow>
-                         <TableHeaderCell>Raza</TableHeaderCell>
-                         <TableHeaderCell>Edad (Meses)</TableHeaderCell>
-                         <TableHeaderCell>Padre</TableHeaderCell>
-                         <TableHeaderCell>Peso (Kg)</TableHeaderCell>
-                         <TableHeaderCell>Estado</TableHeaderCell>
-                         <TableHeaderCell>Acciones</TableHeaderCell>
-                     </TableRow>
-                 </TableHeader>
-                 @foreach (var vaca in vacas)
-                    {
-                        <TableBody>
-                            <TableRow>
-                                <TableRowCell>
-                                    @SimpleText("#", vaca.Raza)
-                                </TableRowCell>
-                                <TableRowCell>
-                                    @SimpleLink("#", (int) vaca.Edad)
-                                </TableRowCell>
-                                <TableRowCell>
-                                    @SimpleText("#", vaca.Padre)
-                                </TableRowCell>
-                                <TableRowCell>
-                                    @Peso((double) vaca.Peso)
-                                </TableRowCell>
-                                <TableRowCell>
-                                   @estado(vaca.Vivo)
-                                </TableRowCell>
-                                <TableRowCell TextAlignment="TextAlignment.Start">
-                                    <Button Type="Blazorise.ButtonType.Link" Color="Blazorise.Color.Light" Size="Blazorise.Size.Small">
-                                        <Icon Name="IconName.Edit" />
-                                    </Button>
-                                    <Button Type="Blazorise.ButtonType.Link" Color="Blazorise.Color.Light" Size="Blazorise.Size.Small">
-                                        <Icon Name="IconName.Delete" />
-                                    </Button>
-                                </TableRowCell>
-                            </TableRow>
-                        </TableBody>
-                    }
-                </Table>
-         </CardBody>
-     </Card>
- </Div>
-}
+        <TemplateColumn CellClass="d-flex justify-left" Title="Acción" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <MudIconButton @onclick="@( () => Actualizar(context.Item) )" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="Vaca" />
+    </PagerContent>
+</MudDataGrid>
+<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+    Registrar Vaca
+</MudButton>
 
 @code {
-    private List<Vaca> vacas = new List<Vaca>();
+    private IEnumerable<Vaca> Elements = new List<Vaca>();
+    private string _searchString;
+    private bool _sortNameByLength;
+    private List<string> _events = new();
+    private List<Vaca> inventario = new List<Vaca>();
+    private Vaca selectedItem1 = null;
+    private HashSet<Vaca> selectedItems = new HashSet<Vaca>();
+    // custom sort by name length
+    private Func<Vaca, object> _sortBy => x =>
+    {
+        if (_sortNameByLength)
+            return x.Raza.Length;
+        else
+            return x.Raza;
+    };
+    // quick filter - filter globally across multiple columns with the same input
+    private Func<Vaca, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if ($"{x.Peso}".Contains(_searchString))
+            return true;
+
+
+        if (x.Padre.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.InfoParto.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (x.HistoriaVac.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.Edad}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    private void OpenDialog()
+    {
+        DialogOptions closeOnEscapeKey = new DialogOptions() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small };
+
+        DialogService.Show<FormVacas>("Formulario vacas", closeOnEscapeKey);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var url = "https://vacas20231113212142.azurewebsites.net/Vacas";
-        vacas = await vacaService.ObtenerElementos(url);
+        Elements = await VacaService.ObtenerElementos(url);
+    } 
+
+    
+
+    private void Actualizar(Vaca select)
+    {
+        if (select != null){
+        
+            VacaService.SetVaca(select);
+        }
+      //  OpenDialog();
     }
-    private RenderFragment SimpleLink(string to, int label) => __builder =>
+    void SelectedItemsChanged(HashSet<Vaca> items)
     {
-        <Anchor To="@to" TextColor="TextColor.Dark" TextWeight="TextWeight.Bold">@label</Anchor>
-        @if (label >= 12)
-        {
-            <Span TextColor="TextColor.Muted" Display="Display.Block" Style="font-size: 0.85rem;">@($"{label / 12} años")</Span>
-        }
-    };
+        selectedItem1 = items.First();
+    }
 
-    private RenderFragment SimpleText(string to, string label) => __builder =>
-    {
-        <Anchor To="@to" TextColor="TextColor.Dark" TextWeight="TextWeight.Bold">@label</Anchor>
-    };
 
-    private RenderFragment Peso(double peso) => __builder =>
-    {
-        <Span TextColor="TextColor.Dark" TextWeight="TextWeight.Bold">@($"{peso}")</Span>
-    };
-
-    private RenderFragment estado(bool status) => __builder =>
-    {
-        if (status)
-        {
-            <Badge Color="Blazorise.Color.Success">Viva</Badge>
-        } else
-        {
-            <Badge Color="Blazorise.Color.Danger">Muerta</Badge>
-        }
-    };
 }
